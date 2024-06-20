@@ -95,7 +95,7 @@ export const logout = async (req, res) => {
 }
 
 // User authenticated or not
-export const getUser = async (req, res) => {
+export const getCurrentUser = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select("-password")
         res.status(200).json(user)
