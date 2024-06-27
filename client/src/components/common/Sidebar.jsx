@@ -15,7 +15,7 @@ const Sidebar = () => {
         <div className='md:flex-[2_2_0] w-18 max-w-52'>
             <div className='sticky top-0 left-0 h-screen flex flex-col border-r border-gray-700 w-20 md:w-full'>
                 <NavLink to='/' className='flex justify-center md:justify-start'>
-                    <h1 className=' lg:w-2/3 fill-white mr-40 text-2xl'>T</h1>
+                    <img src="/avatars/logo.png" alt="logo" style={{ width: "69%", marginTop: "-25px" }} />
                 </NavLink>
                 <ul className='flex flex-col gap-3 mt-4'>
                     <li className='flex justify-center md:justify-start'>
