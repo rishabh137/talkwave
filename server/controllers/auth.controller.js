@@ -4,7 +4,7 @@ import { generateToken } from "../lib/utils/generateToken.js"
 
 export const signup = async (req, res) => {
     try {
-        const { fullname, username, email, password } = req.body
+        const { email, username, fullname, password } = req.body
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(email)) {
@@ -29,9 +29,9 @@ export const signup = async (req, res) => {
         const hashPassword = await bcrypt.hash(password, salt)
 
         const newUser = new User({
-            fullname: fullname,
-            username: username,
             email: email,
+            username: username,
+            fullname: fullname,
             password: hashPassword
         })
 
@@ -41,9 +41,9 @@ export const signup = async (req, res) => {
 
             res.status(201).json({
                 _id: newUser._id,
-                fullname: newUser.fullname,
-                username: newUser.username,
                 email: newUser.email,
+                username: newUser.username,
+                fullname: newUser.fullname,
                 followers: newUser.followers,
                 folowing: newUser.following,
                 profileImg: newUser.profileImg,
@@ -75,9 +75,9 @@ export const login = async (req, res) => {
         generateToken(user._id, res)
         res.status(200).json({
             _id: user._id,
-            fullname: user.fullname,
-            username: user.username,
             email: user.email,
+            username: user.username,
+            fullname: user.fullname,
             followers: user.followers,
             folowing: user.following,
             profileImg: user.profileImg,

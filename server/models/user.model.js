@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
     username: {
         type: String,
         required: true,
@@ -14,11 +19,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minLength: 6
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true
     },
     followers: [
         {
