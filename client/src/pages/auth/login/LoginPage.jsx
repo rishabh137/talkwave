@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
 
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast";
 
 const LoginPage = () => {
@@ -12,6 +12,8 @@ const LoginPage = () => {
         username: "",
         password: "",
     });
+
+    const queryClient = useQueryClient()
 
     const { mutate: loginMutation, isError, isPending, error } = useMutation({
         mutationFn: async ({ username, password }) => {
@@ -28,6 +30,7 @@ const LoginPage = () => {
 
                 if (res.status === 200) {
                     toast.success(`Welcome ${username}`);
+                    queryClient.invalidateQueries({ queryKey: ["authUser"] })
                 } else {
                     throw new Error(data.error || "Unknown server error");
                 }
