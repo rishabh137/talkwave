@@ -4,22 +4,49 @@ import { NavLink } from "react-router-dom";
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
 
+import { useMutation } from "@tanstack/react-query"
+import toast from "react-hot-toast";
+
 const LoginPage = () => {
     const [formData, setFormData] = useState({
         username: "",
         password: "",
     });
 
+    const { mutate: loginMutation, isError, isPending, error } = useMutation({
+        mutationFn: async ({ username, password }) => {
+            try {
+                const res = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ username, password })
+                })
+
+                const data = await res.json()
+
+                if (res.status === 200) {
+                    toast.success(`Welcome ${username}`);
+                } else {
+                    throw new Error(data.error || "Unknown server error");
+                }
+
+            } catch (error) {
+                toast.error(error.message)
+            }
+        }
+    })
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(formData);
+        loginMutation(formData)
+        setFormData({ username: "", password: "" })
     };
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
-
-    const isError = false;
 
     return (
         <div className='max-w-screen-xl mx-auto flex h-screen'>
@@ -33,6 +60,8 @@ const LoginPage = () => {
                     <label className='input input-bordered rounded flex items-center gap-2'>
                         <MdOutlineMail />
                         <input
+                            autoComplete="off"
+                            required={true}
                             type='text'
                             className='grow'
                             placeholder='username'
@@ -45,6 +74,8 @@ const LoginPage = () => {
                     <label className='input input-bordered rounded flex items-center gap-2'>
                         <MdPassword />
                         <input
+                            autoComplete="off"
+                            required={true}
                             type='password'
                             className='grow'
                             placeholder='Password'
@@ -53,11 +84,13 @@ const LoginPage = () => {
                             value={formData.password}
                         />
                     </label>
-                    <button className='btn rounded-full btn-primary text-white'>Login</button>
-                    {isError && <p className='text-red-500'>Something went wrong</p>}
+                    <button className='btn rounded-full btn-primary text-white'>
+                        {isPending ? "Loading..." : "Login"}
+                    </button>
+                    {isError && <p className='text-red-500'>{error.message}</p>}
                 </form>
                 <div className='flex flex-col gap-2 mt-4'>
-                    <p className='text-white text-lg'>{"Don't"} have an account?</p>
+                    <p className='text-white text-lg'>Don't have an account?</p>
                     <NavLink to='/signup'>
                         <button className='btn rounded-full btn-primary text-white btn-outline w-full'>Sign up</button>
                     </NavLink>
