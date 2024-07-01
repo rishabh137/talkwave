@@ -5,19 +5,50 @@ import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import LoadingSpinner from "./LoadingSpinner";
+import toast from "react-hot-toast";
 
 const Post = ({ post }) => {
     const [comment, setComment] = useState("");
     const postOwner = post.user;
     const isLiked = false;
 
-    const isMyPost = true;
+    const queryClient = useQueryClient()
+
+    const { data: authUser } = useQuery({ queryKey: ["authUser"] })
+
+    const { mutate: deletePost, isPending } = useMutation({
+        mutationFn: async () => {
+            try {
+                const res = await fetch(`/api/posts/${post._id}`, {
+                    method: "DELETE"
+                })
+                const data = await res.json()
+
+                if (res.status === 200) {
+                    toast.success("Post deleted successfully");
+                    queryClient.invalidateQueries({ queryKey: ["posts"] })
+                    return data
+                } else {
+                    throw new Error(data.error || "Unknown server error");
+                }
+
+            } catch (error) {
+                throw new Error(error)
+            }
+        }
+    })
+
+    const isMyPost = authUser._id === post.user._id;        // to show trash icon we need to check whether the post is created by authenticated user or not
 
     const formattedDate = "1h";
 
     const isCommenting = false;
 
-    const handleDeletePost = () => { };
+    const handleDeletePost = () => {
+        deletePost()
+    };
 
     const handlePostComment = (e) => {
         e.preventDefault();
@@ -29,23 +60,33 @@ const Post = ({ post }) => {
         <>
             <div className='flex gap-2 items-start p-4 border-b border-gray-700'>
                 <div className='avatar'>
-                    <NavLink to={`/profile/${postOwner.username}`} className='w-8 rounded-full overflow-hidden'>
-                        <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
+                    <NavLink to={`/profile/${postOwner?.username}`} className='w-8 rounded-full overflow-hidden'>
+                        <img src={postOwner?.profileImg || "/avatar-placeholder.png"} />
                     </NavLink>
                 </div>
                 <div className='flex flex-col flex-1'>
                     <div className='flex gap-2 items-center'>
-                        <NavLink to={`/profile/${postOwner.username}`} className='font-bold'>
-                            {postOwner.fullName}
+                        <NavLink to={`/profile/${postOwner?.username}`} className='font-bold'>
+                            {postOwner?.fullname}
                         </NavLink>
                         <span className='text-gray-700 flex gap-1 text-sm'>
-                            <NavLink to={`/profile/${postOwner.username}`}>@{postOwner.username}</NavLink>
+                            <NavLink to={`/profile/${postOwner?.username}`}>@{postOwner?.username}</NavLink>
                             <span>·</span>
                             <span>{formattedDate}</span>
                         </span>
                         {isMyPost && (
                             <span className='flex justify-end flex-1'>
-                                <FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletePost} />
+                                {
+                                    !isPending && (
+                                        <FaTrash className='cursor-pointer hover:text-red-500' onClick={handleDeletePost} />
+                                    )
+                                }
+
+                                {
+                                    isPending && (
+                                        <LoadingSpinner size="sm" />
+                                    )
+                                }
                             </span>
                         )}
                     </div>
@@ -85,18 +126,18 @@ const Post = ({ post }) => {
                                                 <div className='avatar'>
                                                     <div className='w-8 rounded-full'>
                                                         <img
-                                                            src={comment.user.profileImg || "/avatar-placeholder.png"}
+                                                            src={comment.user?.profileImg || "/avatar-placeholder.png"}
                                                         />
                                                     </div>
                                                 </div>
                                                 <div className='flex flex-col'>
                                                     <div className='flex items-center gap-1'>
-                                                        <span className='font-bold'>{comment.user.fullName}</span>
+                                                        <span className='font-bold'>{comment.user?.fullname}</span>
                                                         <span className='text-gray-700 text-sm'>
-                                                            @{comment.user.username}
+                                                            @{comment.user?.username}
                                                         </span>
                                                     </div>
-                                                    <div className='text-sm'>{comment.text}</div>
+                                                    <div className='text-sm'>{comment?.text}</div>
                                                 </div>
                                             </div>
                                         ))}
