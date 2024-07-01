@@ -1,9 +1,32 @@
 import { NavLink } from "react-router-dom";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
-import { USERS_FOR_RIGHT_PANEL } from "../../utils/db/dummy";
+import { useQuery } from "@tanstack/react-query";
 
 const RightPanel = () => {
-    const isLoading = false;
+    const { data: suggestedUsers, isLoading } = useQuery({
+        queryKey: ["suggestedUsers"],
+        queryFn: async () => {
+            try {
+                const res = await fetch("/api/users/suggested")
+
+                const data = await res.json()
+
+                if (res.status === 200) {
+                    return data
+                } else {
+                    throw new Error(data.error || "Unknown server error");
+                }
+
+            } catch (error) {
+                throw new Error(error)
+            }
+        }
+    })
+
+    if (suggestedUsers?.length === 0) {
+        return <div className="md:w-64 w-0"></div>;
+    }
+
 
     return (
         <div className='hidden lg:block my-4 mx-2'>
@@ -19,7 +42,7 @@ const RightPanel = () => {
                         </>
                     )}
                     {!isLoading &&
-                        USERS_FOR_RIGHT_PANEL?.map((user) => (
+                        suggestedUsers?.map((user) => (
                             <NavLink to={`/profile/${user.username}`} className='flex items-center justify-between gap-4' key={user._id}>
                                 <div className='flex gap-2 items-center'>
                                     <div className='avatar'>
@@ -29,7 +52,7 @@ const RightPanel = () => {
                                     </div>
                                     <div className='flex flex-col'>
                                         <span className='font-semibold tracking-tight truncate w-28'>
-                                            {user.fullName}
+                                            {user.fullname}
                                         </span>
                                         <span className='text-sm text-slate-500'>@{user.username}</span>
                                     </div>

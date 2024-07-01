@@ -31,6 +31,8 @@ const CreatePost = () => {
                     toast.success("Post created successfully")
                     queryClient.invalidateQueries({ queryKey: ["posts"] })
                     return data
+                } else {
+                    throw new Error(data.error || "Unknown server error");
                 }
 
             } catch (error) {
@@ -66,7 +68,7 @@ const CreatePost = () => {
                 <textarea
                     className='textarea w-full p-0 text-lg resize-none border-none focus:outline-none  border-gray-800'
                     placeholder='What is happening?!'
-                    required={true}
+                    // required={true}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                 />
