@@ -3,15 +3,18 @@ import { NavLink } from "react-router-dom";
 
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
+import { FaEyeSlash } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast";
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
-        username: "",
-        password: "",
+        username: "admin",
+        password: "admin@123",
     });
+    const [showPassword, setShowPassword] = useState(false)
 
     const queryClient = useQueryClient()
 
@@ -51,6 +54,10 @@ const LoginPage = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handlePassword = () => {
+        setShowPassword(!showPassword)
+    }
+
     return (
         <div className='max-w-screen-xl mx-auto flex h-screen'>
             <div className='flex-1 hidden lg:flex items-center  justify-center'>
@@ -79,13 +86,19 @@ const LoginPage = () => {
                         <input
                             autoComplete="off"
                             required={true}
-                            type='password'
+                            type={!showPassword ? 'password' : "text"}
                             className='grow'
                             placeholder='Password'
                             name='password'
                             onChange={handleInputChange}
                             value={formData.password}
                         />
+                        {
+                            !showPassword ?
+                                <FaEyeSlash cursor="pointer" onClick={handlePassword} />
+                                :
+                                <FaEye cursor="pointer" onClick={handlePassword} />
+                        }
                     </label>
                     <button className='btn rounded-full btn-primary text-white'>
                         {isPending ? "Loading..." : "Login"}

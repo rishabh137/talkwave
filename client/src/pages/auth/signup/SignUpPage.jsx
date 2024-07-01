@@ -1,12 +1,14 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Navigate } from "react-router-dom";
 import { useState } from "react";
 
 import { MdOutlineMail } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
 import { MdDriveFileRenameOutline } from "react-icons/md";
+import { FaEyeSlash } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
 
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast";
 
 const SignUpPage = () => {
@@ -16,6 +18,8 @@ const SignUpPage = () => {
         fullname: "",
         password: "",
     });
+    const [showPassword, setShowPassword] = useState(false)
+    const queryClient = useQueryClient()
 
     const { mutate, isError, isPending, error } = useMutation({
         mutationFn: async ({ email, username, fullname, password }) => {
@@ -31,6 +35,7 @@ const SignUpPage = () => {
                 const data = await res.json()
                 if (res.status === 201) {
                     toast.success("Account created successfully");
+                    queryClient.invalidateQueries({ queryKey: ["authUser"] })
                     return data;
                 } else {
                     throw new Error(data.error || "Unknown server error");
@@ -51,6 +56,10 @@ const SignUpPage = () => {
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
+
+    const handlePassword = () => {
+        setShowPassword(!showPassword)
+    }
 
     return (
         <div className='max-w-screen-xl mx-auto flex h-screen px-10'>
@@ -107,13 +116,19 @@ const SignUpPage = () => {
                         <input
                             required={true}
                             autoComplete="off"
-                            type='password'
+                            type={!showPassword ? 'password' : "text"}
                             className='grow'
                             placeholder='Password'
                             name='password'
                             onChange={handleInputChange}
                             value={formData.password}
                         />
+                        {
+                            !showPassword ?
+                                <FaEyeSlash cursor="pointer" onClick={handlePassword} />
+                                :
+                                <FaEye cursor="pointer" onClick={handlePassword} />
+                        }
                     </label>
                     <button className='btn rounded-full btn-primary text-white'>
                         {isPending ? "Loading..." : "Sign up"}
