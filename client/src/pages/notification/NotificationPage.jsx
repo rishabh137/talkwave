@@ -2,35 +2,96 @@ import { NavLink } from "react-router-dom";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 import { IoSettingsOutline } from "react-icons/io5";
-import { FaUser } from "react-icons/fa";
+import { FaTrash, FaUser } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const NotificationPage = () => {
-    const isLoading = false;
-    const notifications = [
-        {
-            _id: "1",
-            from: {
-                _id: "1",
-                username: "rishabh",
-                profileImg: "/avatars/boy2.png",
-            },
-            type: "follow",
+    const queryClient = useQueryClient()
+    const { data: notifications, isLoading } = useQuery({
+        queryKey: ["notifications"],
+        queryFn: async () => {
+            try {
+                const res = await fetch("/api/notifications")
+                const data = await res.json()
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Unknown server error");
+                }
+
+                return data
+
+            } catch (error) {
+                throw new Error(error.message)
+            }
+        }
+    })
+
+    const { mutate: deleteAllNotification } = useMutation({
+        mutationFn: async () => {
+            try {
+                const res = await fetch("/api/notifications", {
+                    method: "DELETE"
+                })
+
+                const data = await res.json()
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Unknown server error");
+                }
+
+                return data
+
+            } catch (error) {
+                throw new Error(error.message)
+            }
         },
-        {
-            _id: "2",
-            from: {
-                _id: "2",
-                username: "sidd",
-                profileImg: "/avatars/boy1.png",
-            },
-            type: "like",
+        onSuccess: () => {
+            toast.success("Notifications deleted successfully")
+            queryClient.invalidateQueries({ queryKey: ["notifications"] })
         },
-    ];
+        onError: () => {
+            toast.error(error.message)
+        }
+    })
+
+    const { mutate: deleteSingle } = useMutation({
+        mutationFn: async (notificationId) => {
+            try {
+                const res = await fetch(`/api/notifications/${notificationId}`, {
+                    method: "DELETE"
+                })
+
+                const data = await res.json()
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Unknown server error");
+                }
+
+                return data
+
+            } catch (error) {
+                throw new Error(error.message)
+            }
+        },
+        onSuccess: () => {
+            toast.success("Notification deleted successfully")
+            queryClient.invalidateQueries({ queryKey: ["notifications"] })
+        },
+        onError: () => {
+            toast.error(error.message)
+        }
+    })
 
     const deleteNotifications = () => {
-        alert("All notifications deleted");
-    };
+        if (notifications.length === 0) return
+        deleteAllNotification()
+    }
+
+    const deleteSingleNotification = (notificationId) => {
+        deleteSingle(notificationId)
+    }
 
     return (
         <>
@@ -55,7 +116,8 @@ const NotificationPage = () => {
                 )}
                 {notifications?.length === 0 && <div className='text-center p-4 font-bold'>No notifications 🤔</div>}
                 {notifications?.map((notification) => (
-                    <div className='border-b border-gray-700' key={notification._id}>
+                    <div className='border-b border-gray-700 flex justify-between' key={notification._id}>
+
                         <div className='flex gap-2 p-4'>
                             {notification.type === "follow" && <FaUser className='w-7 h-7 text-primary' />}
                             {notification.type === "like" && <FaHeart className='w-7 h-7 text-red-500' />}
@@ -70,6 +132,9 @@ const NotificationPage = () => {
                                     {notification.type === "follow" ? "followed you" : "liked your post"}
                                 </div>
                             </NavLink>
+                        </div>
+                        <div className='pr-4 pt-2'>
+                            <FaTrash className='cursor-pointer hover:text-red-500' onClick={() => deleteSingleNotification(notification._id)} />
                         </div>
                     </div>
                 ))}
