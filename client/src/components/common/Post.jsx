@@ -9,16 +9,19 @@ import { NavLink } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import LoadingSpinner from "./LoadingSpinner";
 import toast from "react-hot-toast";
+import { formatPostDate } from "../../utils/date/formatedDate";
 
 const Post = ({ post }) => {
     const [comment, setComment] = useState("");
     const postOwner = post.user;
 
     const queryClient = useQueryClient()
-
     const { data: authUser } = useQuery({ queryKey: ["authUser"] })
-
     const isLiked = post.likes.includes(authUser._id);
+    const isMyPost = authUser._id === post.user._id;        // to show trash icon we need to check whether the post is created by authenticated user or not
+
+    const formattedDate = formatPostDate(post.createdAt);
+
 
     const { mutate: deletePost, isPending } = useMutation({
         mutationFn: async () => {
@@ -75,11 +78,37 @@ const Post = ({ post }) => {
         }
     })
 
-    const isMyPost = authUser._id === post.user._id;        // to show trash icon we need to check whether the post is created by authenticated user or not
+    const { mutate: commentPost, isPending: isCommenting } = useMutation({
+        mutationFn: async () => {
+            try {
+                const res = await fetch(`/api/posts/comment/${post._id}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ text: comment })
+                })
+                const data = await res.json()
 
-    const formattedDate = "1h";
+                if (!res.ok) {
+                    throw new Error(data.error || "Unknown server error");
+                }
 
-    const isCommenting = false;
+                return data
+
+            } catch (error) {
+                throw new Error(error)
+            }
+        },
+        onSuccess: () => {
+            toast.success("Comment posted successfully")
+            setComment("")
+            queryClient.invalidateQueries({ queryKey: ["posts"] })
+        },
+        onError: (error) => {
+            throw new Error(error.message)
+        }
+    })
 
     const handleDeletePost = () => {
         deletePost()
@@ -87,6 +116,8 @@ const Post = ({ post }) => {
 
     const handlePostComment = (e) => {
         e.preventDefault();
+        if (isCommenting) return;
+        commentPost()
     };
 
     const handleLikePost = () => {
