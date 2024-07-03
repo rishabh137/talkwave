@@ -33,6 +33,7 @@ const LoginPage = () => {
 
                 if (res.status === 200) {
                     toast.success(`Welcome ${username}`);
+                    setFormData({ username: "", password: "" })
                     queryClient.invalidateQueries({ queryKey: ["authUser"] })
                 } else {
                     throw new Error(data.error || "Unknown server error");
@@ -47,7 +48,6 @@ const LoginPage = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         loginMutation(formData)
-        setFormData({ username: "", password: "" })
     };
 
     const handleInputChange = (e) => {

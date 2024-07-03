@@ -91,7 +91,7 @@ export const getSuggestedUser = async (req, res) => {
 }
 
 export const updateUserProfile = async (req, res) => {
-    const { fullname, email, username, currentPassword, newPassword, bio, link } = req.body
+    const { fullname, email, username, currentPassword, newPassword, bio } = req.body
     let { profileImg, coverImg } = req.body
 
     const userId = req.user._id
@@ -140,7 +140,6 @@ export const updateUserProfile = async (req, res) => {
         user.email = email || user.email
         user.username = username || user.username
         user.bio = bio || user.bio
-        user.link = link || user.link
         user.profileImg = profileImg || user.profileImg
         user.coverImg = coverImg || user.coverImg
 
@@ -150,7 +149,6 @@ export const updateUserProfile = async (req, res) => {
         return res.status(200).json(user)
 
     } catch (error) {
-        console.log(error);
         res.status(500).json({ error: "Something went wrong" })
     }
 }

@@ -5,31 +5,35 @@ import Posts from "../../components/common/Posts";
 import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton";
 import EditProfileModal from "./EditProfileModal";
 
-import { POSTS } from "../../utils/db/dummy";
+import useFollow from "../../hooks/useFollow";
 
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
-import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { formatMemberSinceDate } from "../../utils/date/formatedDate";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import useUpdate from "../../hooks/useUpdate";
 
 const ProfilePage = () => {
     const [coverImg, setCoverImg] = useState(null);
     const [profileImg, setProfileImg] = useState(null);
     const [feedType, setFeedType] = useState("posts");
-    const username = useParams()
+    const { username } = useParams()
+
+    const { follow, isPending } = useFollow()
 
     const coverImgRef = useRef(null);
     const profileImgRef = useRef(null);
 
-    const isMyProfile = true;
+    const { data: authUser } = useQuery({ queryKey: ["authUser"] })
+    const { data: postLen } = useQuery({ queryKey: ["posts"] })
 
     const { data: user, isLoading, refetch, isRefetching } = useQuery({
         queryKey: ["userProfile"],
         queryFn: async () => {
             try {
-                const res = await fetch(`/api/users/profile/${username.username}`)
+                const res = await fetch(`/api/users/profile/${username}`)
                 const data = await res.json()
 
                 if (res.status === 200) {
@@ -44,7 +48,13 @@ const ProfilePage = () => {
             }
         }
     })
+
+    const { updateProfile, isUpdating } = useUpdate()
+
     const memeberSinceDate = formatMemberSinceDate(user?.createdAt)
+    const isMyProfile = authUser?._id === user?._id
+    const isFollowing = authUser?.following.includes(user?._id)
+    const userPosts = postLen?.length
 
     useEffect(() => {
         refetch()
@@ -76,7 +86,7 @@ const ProfilePage = () => {
                                 </NavLink>
                                 <div className='flex flex-col'>
                                     <p className='font-bold text-lg'>{user?.fullname}</p>
-                                    <span className='text-sm text-slate-500'>{POSTS?.length} posts</span>
+                                    <span className='text-sm text-slate-500'>{userPosts} posts</span>
                                 </div>
                             </div>
 
@@ -123,21 +133,33 @@ const ProfilePage = () => {
                                 </div>
                             </div>
                             <div className='flex justify-end px-4 mt-5'>
-                                {isMyProfile && <EditProfileModal />}
+                                {isMyProfile && <EditProfileModal authUser={authUser} />}
                                 {!isMyProfile && (
                                     <button
                                         className='btn btn-outline rounded-full btn-sm'
-                                        onClick={() => alert("Followed successfully")}
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            follow(user._id)
+                                        }}
                                     >
-                                        Follow
+                                        {
+                                            isPending ?
+                                                <LoadingSpinner size="sm" />
+                                                :
+                                                isFollowing ? "Unfollow" : "Follow"
+                                        }
                                     </button>
                                 )}
                                 {(coverImg || profileImg) && (
                                     <button
                                         className='btn btn-primary rounded-full btn-sm text-white px-4 ml-2'
-                                        onClick={() => alert("Profile updated successfully")}
+                                        onClick={async () => {
+                                            await updateProfile({ coverImg, profileImg })
+                                            setProfileImg(null)
+                                            setCoverImg(null)
+                                        }}
                                     >
-                                        Update
+                                        {isUpdating ? <LoadingSpinner size="sm" /> : "Update"}
                                     </button>
                                 )}
                             </div>
@@ -150,21 +172,6 @@ const ProfilePage = () => {
                                 </div>
 
                                 <div className='flex gap-2 flex-wrap'>
-                                    {user?.link && (
-                                        <div className='flex gap-1 items-center '>
-                                            <>
-                                                <FaLink className='w-3 h-3 text-slate-500' />
-                                                <a
-                                                    href='https://youtube.com'
-                                                    target='_blank'
-                                                    rel='noreferrer'
-                                                    className='text-sm text-blue-500 hover:underline'
-                                                >
-                                                    youtube.com
-                                                </a>
-                                            </>
-                                        </div>
-                                    )}
                                     <div className='flex gap-2 items-center'>
                                         <IoCalendarOutline className='w-4 h-4 text-slate-500' />
                                         <span className='text-sm text-slate-500'>{memeberSinceDate}</span>
@@ -204,7 +211,7 @@ const ProfilePage = () => {
                         </>
                     )}
 
-                    <Posts feedType={feedType} username={username.username} userId={user?._id} />
+                    <Posts feedType={feedType} username={username} userId={user?._id} />
                 </div>
             </div>
         </>

@@ -1,19 +1,47 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import useUpdate from "../../hooks/useUpdate";
 
-const EditProfileModal = () => {
+const EditProfileModal = ({ authUser }) => {
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+    const [showNewPassword, setShowNewPassword] = useState(false)
+
     const [formData, setFormData] = useState({
-        fullName: "",
+        fullname: "",
         username: "",
         email: "",
         bio: "",
-        link: "",
         newPassword: "",
         currentPassword: "",
     });
 
+    const { updateProfile, isUpdating } = useUpdate()
+
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
+
+    useEffect(() => {
+        if (authUser) {
+            setFormData({
+                fullname: authUser.fullname,
+                username: authUser.username,
+                email: authUser.email,
+                bio: authUser.bio,
+                newPassword: "",
+                currentPassword: ""
+            })
+        }
+    }, [])
+
+    const handleCurrentPassword = () => {
+        setShowCurrentPassword(!showCurrentPassword)
+    }
+
+    const handleNewPassword = () => {
+        setShowNewPassword(!showNewPassword)
+    }
 
     return (
         <>
@@ -30,7 +58,7 @@ const EditProfileModal = () => {
                         className='flex flex-col gap-4'
                         onSubmit={(e) => {
                             e.preventDefault();
-                            alert("Profile updated successfully");
+                            updateProfile(formData)
                         }}
                     >
                         <div className='flex flex-wrap gap-2'>
@@ -38,8 +66,8 @@ const EditProfileModal = () => {
                                 type='text'
                                 placeholder='Full Name'
                                 className='flex-1 input border border-gray-700 rounded p-2 input-md'
-                                value={formData.fullName}
-                                name='fullName'
+                                value={formData.fullname}
+                                name='fullname'
                                 onChange={handleInputChange}
                             />
                             <input
@@ -68,33 +96,44 @@ const EditProfileModal = () => {
                                 onChange={handleInputChange}
                             />
                         </div>
-                        <div className='flex flex-wrap gap-2'>
-                            <input
-                                type='password'
-                                placeholder='Current Password'
-                                className='flex-1 input border border-gray-700 rounded p-2 input-md'
-                                value={formData.currentPassword}
-                                name='currentPassword'
-                                onChange={handleInputChange}
-                            />
-                            <input
-                                type='password'
-                                placeholder='New Password'
-                                className='flex-1 input border border-gray-700 rounded p-2 input-md'
-                                value={formData.newPassword}
-                                name='newPassword'
-                                onChange={handleInputChange}
-                            />
+                        <div className='flex flex-wrap gap-4'>
+                            <label className='input border border-gray-700 rounded p-2 input-md flex items-center gap-2'>
+                                <input
+                                    type={!showCurrentPassword ? 'password' : "text"}
+                                    placeholder='Current Password'
+                                    className=''
+                                    value={formData.currentPassword}
+                                    name='currentPassword'
+                                    onChange={handleInputChange}
+                                />
+                                {
+                                    !showCurrentPassword ?
+                                        <FaEyeSlash cursor="pointer" onClick={handleCurrentPassword} />
+                                        :
+                                        <FaEye cursor="pointer" onClick={handleCurrentPassword} />
+                                }
+                            </label>
+                            <label className='input border border-gray-700 rounded p-2 input-md flex items-center gap-2'>
+
+                                <input
+                                    type={!showNewPassword ? 'password' : "text"}
+                                    placeholder='New Password'
+                                    className=''
+                                    value={formData.newPassword}
+                                    name='newPassword'
+                                    onChange={handleInputChange}
+                                />
+                                {
+                                    !showNewPassword ?
+                                        <FaEyeSlash cursor="pointer" onClick={handleNewPassword} />
+                                        :
+                                        <FaEye cursor="pointer" onClick={handleNewPassword} />
+                                }
+                            </label>
                         </div>
-                        <input
-                            type='text'
-                            placeholder='Link'
-                            className='flex-1 input border border-gray-700 rounded p-2 input-md'
-                            value={formData.link}
-                            name='link'
-                            onChange={handleInputChange}
-                        />
-                        <button className='btn btn-primary rounded-full btn-sm text-white'>Update</button>
+                        <button className='btn btn-primary rounded-full btn-sm text-white'>
+                            {isUpdating ? <LoadingSpinner size="sm" /> : "Update"}
+                        </button>
                     </form>
                 </div>
                 <form method='dialog' className='modal-backdrop'>
