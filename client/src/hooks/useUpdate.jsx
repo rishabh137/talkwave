@@ -21,7 +21,11 @@ const useUpdate = () => {
                     throw new Error(data.error || "Unknown server error");
                 }
 
-                return data
+                if (res.status === 200) {
+                    const newPath = `/profile/${formData.username}`
+                    window.history.replaceState(null, '', newPath)
+                    return data
+                }
 
             } catch (error) {
                 throw new Error(error.message)
