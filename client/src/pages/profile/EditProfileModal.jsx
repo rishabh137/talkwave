@@ -47,7 +47,12 @@ const EditProfileModal = ({ authUser }) => {
         <>
             <button
                 className='btn btn-outline rounded-full btn-sm'
-                onClick={() => document.getElementById("edit_profile_modal").showModal()}
+                onClick={() => {
+                    authUser.username === "testuser" ?
+                        window.alert("This is a test model. To update the profile, please create a new account. But you can update profile picture.")
+                        :
+                        document.getElementById("edit_profile_modal").showModal()
+                }}
             >
                 Edit profile
             </button>

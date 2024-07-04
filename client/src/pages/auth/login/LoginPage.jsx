@@ -11,8 +11,8 @@ import toast from "react-hot-toast";
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
-        username: "admin",
-        password: "admin@123",
+        username: "testuser",
+        password: "testuser123",
     });
     const [showPassword, setShowPassword] = useState(false)
 
