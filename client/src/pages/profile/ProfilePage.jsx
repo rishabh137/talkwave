@@ -46,8 +46,7 @@ const ProfilePage = () => {
             } catch (error) {
                 throw new Error(error)
             }
-        },
-        retry: false
+        }
     })
 
     const { updateProfile, isUpdating } = useUpdate()
@@ -168,7 +167,7 @@ const ProfilePage = () => {
                             <div className='flex flex-col gap-4 mt-14 px-4'>
                                 <div className='flex flex-col'>
                                     <span className='font-bold text-lg'>{user?.fullname}</span>
-                                    <span className='text-sm text-slate-500'>@{location.href.split("/").pop()}</span>
+                                    <span className='text-sm text-slate-500'>@{user?.username}</span>
                                     <span className='text-sm my-1'>{user?.bio}</span>
                                 </div>
 
