@@ -28,7 +28,6 @@ const ProfilePage = () => {
 
     const { data: authUser } = useQuery({ queryKey: ["authUser"] })
     const { data: postLen } = useQuery({ queryKey: ["posts"] })
-    console.log(authUser);
 
     const { data: user, isLoading, refetch, isRefetching } = useQuery({
         queryKey: ["userProfile"],
@@ -47,7 +46,8 @@ const ProfilePage = () => {
             } catch (error) {
                 throw new Error(error)
             }
-        }
+        },
+        retry: false
     })
 
     const { updateProfile, isUpdating } = useUpdate()
@@ -167,9 +167,9 @@ const ProfilePage = () => {
 
                             <div className='flex flex-col gap-4 mt-14 px-4'>
                                 <div className='flex flex-col'>
-                                    <span className='font-bold text-lg'>{authUser?.fullname}</span>
-                                    <span className='text-sm text-slate-500'>@{authUser?.username}</span>
-                                    <span className='text-sm my-1'>{authUser?.bio}</span>
+                                    <span className='font-bold text-lg'>{user?.fullname}</span>
+                                    <span className='text-sm text-slate-500'>@{location.href.split("/").pop()}</span>
+                                    <span className='text-sm my-1'>{user?.bio}</span>
                                 </div>
 
                                 <div className='flex gap-2 flex-wrap'>
