@@ -10,10 +10,10 @@ import useFollow from "../../hooks/useFollow";
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { MdEdit } from "react-icons/md";
-import { useQuery } from "@tanstack/react-query";
 import { formatMemberSinceDate } from "../../utils/date/formatedDate";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import useUpdate from "../../hooks/useUpdate";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const ProfilePage = () => {
     const [coverImg, setCoverImg] = useState(null);
@@ -29,11 +29,14 @@ const ProfilePage = () => {
     const { data: authUser } = useQuery({ queryKey: ["authUser"] })
     const { data: postLen } = useQuery({ queryKey: ["posts"] })
 
+    const queryClient = useQueryClient()
+    const userdata = location.href.split('/').pop()
+
     const { data: user, isLoading, refetch, isRefetching } = useQuery({
         queryKey: ["userProfile"],
         queryFn: async () => {
             try {
-                const res = await fetch(`/api/users/profile/${username}`)
+                const res = await fetch(`/api/users/profile/${userdata}`)
                 const data = await res.json()
 
                 if (res.status === 200) {
@@ -49,7 +52,43 @@ const ProfilePage = () => {
         }
     })
 
-    const { updateProfile, isUpdating } = useUpdate()
+    const { mutateAsync: updateProfile, isPending: isUpdating } = useMutation({
+        mutationFn: async () => {
+            try {
+                const res = await fetch("/api/users/update", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ coverImg, profileImg })
+                })
+
+                const data = await res.json()
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Unknown server error");
+                }
+
+                return data
+
+            } catch (error) {
+                throw new Error(error.message)
+            }
+        },
+        onSuccess: () => {
+            toast.success("Porfile updated");
+            setCoverImg(null)
+            setProfileImg(null)
+
+            Promise.all([
+                queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+                queryClient.invalidateQueries({ queryKey: ["userProfile"] })
+            ])
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    })
 
     const memeberSinceDate = formatMemberSinceDate(user?.createdAt)
     const isMyProfile = authUser?._id === user?._id
@@ -153,11 +192,7 @@ const ProfilePage = () => {
                                 {(coverImg || profileImg) && (
                                     <button
                                         className='btn btn-primary rounded-full btn-sm text-white px-4 ml-2'
-                                        onClick={async () => {
-                                            await updateProfile({ coverImg, profileImg })
-                                            setProfileImg(null)
-                                            setCoverImg(null)
-                                        }}
+                                        onClick={() => updateProfile()}
                                     >
                                         {isUpdating ? <LoadingSpinner size="sm" /> : "Update"}
                                     </button>
@@ -167,7 +202,7 @@ const ProfilePage = () => {
                             <div className='flex flex-col gap-4 mt-14 px-4'>
                                 <div className='flex flex-col'>
                                     <span className='font-bold text-lg'>{user?.fullname}</span>
-                                    <span className='text-sm text-slate-500'>@{user?.username}</span>
+                                    <span className='text-sm text-slate-500'>@{userdata}</span>
                                     <span className='text-sm my-1'>{user?.bio}</span>
                                 </div>
 
