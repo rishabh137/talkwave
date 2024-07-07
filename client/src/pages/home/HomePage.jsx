@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import Posts from "../../components/common/Posts";
 import CreatePost from "./CreatePost";
-// import MoodSelector from "../../components/common/MoodSelector";
 
 const HomePage = () => {
     const [feedType, setFeedType] = useState("forYou");
@@ -26,8 +25,6 @@ const HomePage = () => {
                 </div>
 
                 <CreatePost />
-
-                {/* <MoodSelector /> */}
 
                 <Posts feedType={feedType} />
             </div>
