@@ -3,6 +3,7 @@ import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import useFollow from "../../hooks/useFollow";
 import LoadingSpinner from "./LoadingSpinner";
+import UserMoodSelector from "./UserMoodSelector";
 
 const RightPanel = () => {
     const { data: suggestedUsers, isLoading } = useQuery({
@@ -75,6 +76,9 @@ const RightPanel = () => {
                             </NavLink>
                         ))}
                 </div>
+            </div>
+            <div className='bg-[#16181C] py-4 rounded-md fixed mt-2'>
+                <UserMoodSelector />
             </div>
         </div>
     );
