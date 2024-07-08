@@ -35,11 +35,15 @@ const MoodContent = () => {
             <div className='flex-[4_4_0] mr-auto border-r border-gray-700 min-h-screen'>
                 {
                     params.mood === "happy" &&
-                    <h1 className="text-2xl text-center my-5 border-b border-gray-700 font-normal">That's nice you are happy, Here is some jokes that might help you.</h1>
+                    <h1 className="text-3xl text-center my-5 border-b border-gray-700 font-normal">That's nice you are happy, Here is some jokes that might help you.</h1>
                 }
                 {
                     params.mood === "sad" &&
-                    <h1 className="text-2xl text-center my-5 border-b border-gray-700 font-normal">Since you are sad, Here is some motivational contents to cheer you!</h1>
+                    <h1 className="text-3xl text-center my-5 border-b border-gray-700 font-normal">Since you are sad, Here is some motivational contents to cheer you!</h1>
+                }
+                {
+                    params.mood === "angry" &&
+                    <h1 className="text-3xl text-center my-5 border-b border-gray-700 font-normal">Here is some quotes that can calm you!</h1>
                 }
                 {(isLoading || isRefetching) && (
                     <>

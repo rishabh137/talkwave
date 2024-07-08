@@ -59,6 +59,25 @@ export const getHappyContent = async (req, res) => {
         res.status(200).json(content)
 
     } catch (error) {
+        res.status(500).json({ error: "Something went wrong" })
+    }
+}
+
+export const getAngryContent = async (req, res) => {
+    try {
+        let content = []
+
+        const response = await fetch("https://zenquotes.io/api/quotes")
+        if (!response) {
+            return res.status(400).json({ error: "Something went wrong" })
+        }
+
+        const data = await response.json()
+        content = content.concat(data.map(adviceObj => adviceObj.q))
+
+        res.status(200).json(content)
+
+    } catch (error) {
         console.log(error);
         res.status(500).json({ error: "Something went wrong" })
     }
