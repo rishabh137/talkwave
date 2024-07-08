@@ -2,6 +2,7 @@ import path from "path"
 import express from "express"
 import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
+import bodyParser from "body-parser"
 import { v2 as cloudinary } from "cloudinary"
 import authRoutes from "./routes/auth.routes.js"
 import userRoutes from "./routes/user.routes.js"
@@ -23,6 +24,8 @@ const PORT = process.env.PORT || 5000
 const __dirname = path.resolve()
 
 app.use(express.json({ limit: '5mb' }))
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 

@@ -1,3 +1,5 @@
+import Shayari from "../models/shayari.model.js";
+
 export const getJokes = async (req, res) => {
     try {
         let jokes = []
@@ -78,7 +80,36 @@ export const getAngryContent = async (req, res) => {
         res.status(200).json(content)
 
     } catch (error) {
-        console.log(error);
+        res.status(500).json({ error: "Something went wrong" })
+    }
+}
+
+export const getLoveContent = async (req, res) => {
+    try {
+        let content = []
+        const count = await Shayari.countDocuments()
+
+        if (count < 15) {
+            return res.status(400).json({ message: 'Not enough documents to fetch 15 random shayari' });
+        }
+
+        const numShayari = Math.floor(Math.random() * (15 - 10 + 1)) + 10       // shayari should range between 10 and 15
+
+        const randomIndices = []
+        while (randomIndices.length < numShayari) {
+            const randomIndex = Math.floor(Math.random() * count)
+            if (!randomIndices.includes(randomIndex)) {
+                randomIndices.push(randomIndex)
+            }
+        }
+
+        const randomShayari = await Shayari.find({}).skip(randomIndices[0]).limit(numShayari)
+
+
+        content = content.concat(randomShayari.map(shayariObj => shayariObj.data))
+        res.status(200).json(content)
+
+    } catch (error) {
         res.status(500).json({ error: "Something went wrong" })
     }
 }

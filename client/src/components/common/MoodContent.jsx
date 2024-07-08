@@ -35,15 +35,19 @@ const MoodContent = () => {
             <div className='flex-[4_4_0] mr-auto border-r border-gray-700 min-h-screen'>
                 {
                     params.mood === "happy" &&
-                    <h1 className="text-3xl text-center my-5 border-b border-gray-700 font-normal">That's nice you are happy, Here is some jokes that might help you.</h1>
+                    <h1 className="text-3xl text-center my-5 border-b border-gray-700 font-normal">Great to see you're feeling happy! Enjoy some jokes to keep the smiles going!</h1>
                 }
                 {
                     params.mood === "sad" &&
-                    <h1 className="text-3xl text-center my-5 border-b border-gray-700 font-normal">Since you are sad, Here is some motivational contents to cheer you!</h1>
+                    <h1 className="text-3xl text-center my-5 border-b border-gray-700 font-normal">If you're feeling down, here are some motivational contents to lift your spirits!</h1>
                 }
                 {
                     params.mood === "angry" &&
-                    <h1 className="text-3xl text-center my-5 border-b border-gray-700 font-normal">Here is some quotes that can calm you!</h1>
+                    <h1 className="text-3xl text-center my-5 border-b border-gray-700 font-normal">Feeling angry? Here are some quotes to help bring peace and calm.</h1>
+                }
+                {
+                    params.mood === "love" &&
+                    <h1 className="text-3xl text-center my-5 border-b border-gray-700 font-normal">Indulge in some beautiful shayari about love that you might enjoy!</h1>
                 }
                 {(isLoading || isRefetching) && (
                     <>
@@ -52,14 +56,21 @@ const MoodContent = () => {
                         </div>
                     </>
                 )}
-                {
-                    !isLoading && !isRefetching &&
-                    getMoodData?.map((data, ind) => (
-                        <div key={ind} className="p-5 border-b border-gray-700">
-                            <p>{data}</p>
-                        </div>
-                    ))
-                }
+                {!isLoading && !isRefetching && (
+                    <div>
+                        {getMoodData?.map((data, index) => (
+                            <div key={index} className="p-5 border-b border-gray-700">
+                                {typeof data === 'string' ? (
+                                    data.split('\n').map((line, lineIndex) => (
+                                        <p key={lineIndex}>{line}</p>
+                                    ))
+                                ) : (
+                                    <p>{data}</p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </>
     )
