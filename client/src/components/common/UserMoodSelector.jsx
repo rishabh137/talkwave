@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import moodEmoji from "../../utils/mood/moodEmoji";
 
-const UserMood = () => {
+const UserMoodSelector = () => {
 
     return (
         <div className="container p-4">
@@ -26,4 +26,4 @@ const UserMood = () => {
     )
 }
 
-export default UserMood
+export default UserMoodSelector
