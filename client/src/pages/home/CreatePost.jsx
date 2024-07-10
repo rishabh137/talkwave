@@ -68,7 +68,6 @@ const CreatePost = () => {
                 <textarea
                     className='textarea w-full p-0 text-lg resize-none border-none focus:outline-none  border-gray-800'
                     placeholder='What is happening?!'
-                    // required={true}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                 />
