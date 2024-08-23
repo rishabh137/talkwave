@@ -1,6 +1,6 @@
 
-# Social Media Platform
-This is a social media platform developed using modern web technologies to provide a seamless and interactive user experience. This platform allows users to create and share posts, interact with each other's content, and express their moods through dynamic content display.
+# Talkwave
+Talkwave is a social media platform developed using modern web technologies to provide a seamless and interactive user experience. This platform allows users to create and share posts, interact with each other's content, and express their moods through dynamic content display.
 
 ## Technologies Used 🛠️
 - **React.js** (Frontend)
